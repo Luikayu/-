@@ -114,13 +114,12 @@
         const x = random(0, canvas.width);
         const y = canvas.height;
         fireworks.push(new Firework(x, y));
-        displayText("Happy NewYear");
-        displayText("Get good grades");
-        displayText("For Luikayu");
+        displayText("Happy NewYear\nGet Good Grades\nTo Luikayu");
     }
 
     function displayText(text) {
-        congrats.textContent = text;
+        const lines = text.split('\n'); 
+        congrats.innerHTML = lines.join('<br>'); 
         congrats.style.opacity = 1;
         setTimeout(() => {
             congrats.style.opacity = 0;
