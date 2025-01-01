@@ -1,0 +1,143 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>随机烟花效果</title>
+    <style>
+        body {
+            margin: 0;
+            padding: 0;
+            background: black;
+            overflow: hidden;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+        }
+        canvas {
+            display: block;
+        }
+        #congrats {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            color: #ff00ff; /* 紫色 */
+            font-size: 3em;
+            opacity: 0;
+            transition: opacity 2s ease-in-out;
+            pointer-events: none;
+            white-space: nowrap;
+            font-family: 'Arial Black', sans-serif;
+            text-shadow: 0 0 5px #ffffff, 0 0 10px #ffffff, 0 0 20px #ff00ff, 0 0 30px #ff00ff, 0 0 40px #ff00ff, 0 0 50px #ff00ff, 0 0 75px #ff00ff;
+            animation: flash 3s ease-in-out infinite;
+        }
+        @keyframes flash {
+            0%, 100% { opacity: 0; }
+            50% { opacity: 1; }
+        }
+    </style>
+</head>
+<body>
+<canvas id="fireworksCanvas"></canvas>
+<div id="congrats">文本</div>
+<script>
+    const canvas = document.getElementById('fireworksCanvas');
+    const ctx = canvas.getContext('2d');
+    const congrats = document.getElementById('congrats');
+
+    canvas.width = window.innerWidth;
+    canvas.height = window.innerHeight;
+
+    function random(min, max) {
+        return Math.random() * (max - min) + min;
+    }
+
+    function randomColor() {
+        return {
+            r: Math.floor(random(0, 255)),
+            g: Math.floor(random(0, 255)),
+            b: Math.floor(random(0, 255))
+        };
+    }
+
+    class Particle {
+        constructor(x, y, color) {
+            this.x = x;
+            this.y = y;
+            this.color = color;
+            this.radius = random(2, 5);
+            this.opacity = 1;
+            this.velocity = {
+                x: random(-5, 5),
+                y: random(-20, -5)
+            };
+        }
+
+        draw() {
+            ctx.beginPath();
+            ctx.arc(this.x, this.y, this.radius, 0, Math.PI * 2, false);
+            ctx.fillStyle = `rgba(${this.color.r}, ${this.color.g}, ${this.color.b}, ${this.opacity})`;
+            ctx.fill();
+        }
+
+        update() {
+            this.x += this.velocity.x;
+            this.y += this.velocity.y;
+            this.velocity.y += 0.1; // gravity
+            this.opacity -= 0.01;
+            if (this.opacity > 0) {
+                this.draw();
+            }
+        }
+    }
+
+    class Firework {
+        constructor(x, y) {
+            this.particles = [];
+            for (let i = 0; i < 100; i++) {
+                const color = randomColor();
+                this.particles.push(new Particle(x, y, color));
+            }
+        }
+
+        update() {
+            this.particles.forEach(particle => particle.update());
+            this.particles = this.particles.filter(particle => particle.opacity > 0);
+        }
+    }
+
+    let fireworks = [];
+
+    function explodeFirework() {
+        const x = random(0, canvas.width);
+        const y = canvas.height;
+        fireworks.push(new Firework(x, y));
+        displayText("Luikayu2025天天快乐, 考试必过");
+    }
+
+    function displayText(text) {
+        congrats.textContent = text;
+        congrats.style.opacity = 1;
+        setTimeout(() => {
+            congrats.style.opacity = 0;
+        }, 2000);
+    }
+
+    function animate() {
+        ctx.clearRect(0, 0, canvas.width, canvas.height);
+        fireworks.forEach(firework => firework.update());
+        fireworks = fireworks.filter(firework => firework.particles.length > 0);
+
+        if (Math.random() < 0.05) {
+            explodeFirework();
+        }
+
+        requestAnimationFrame(animate);
+    }
+
+    animate();
+</script>
+</body>
+</html>
